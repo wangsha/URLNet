@@ -38,8 +38,8 @@ class TextCNN(object):
         if mode == CHAR or mode == CHAR_AND_WORD or mode == CHARWORD_AND_WORD_AND_CHAR:
             self.input_x_char_id = tf.placeholder(tf.int32, [None, None], name="input_x_char_id")
 
-        self.input_expert_features = tf.placeholder(tf.float32, [None, expert_feature_size],
-                                                        name="input_expert_feature")
+        self.input_expert_feature = tf.placeholder(tf.float32, [None, expert_feature_size],
+                                                   name="input_expert_feature")
         self.input_y = tf.placeholder(tf.float32, [None, 2], name="input_y")
         self.dropout_keep_prob = tf.placeholder(tf.float32, name="dropout_keep_prob")
 
@@ -171,7 +171,7 @@ class TextCNN(object):
 
         ############################### HUMAN Expert Features ############################
         if add_expert_feature:
-            self.conv_output = tf.concat([self.conv_output, self.input_expert_features], 1)
+            self.conv_output = tf.concat([self.conv_output, self.input_expert_feature], 1)
         ################################ RELU AND FC ###################################
         with tf.name_scope("output"):
             input_dim = 1024

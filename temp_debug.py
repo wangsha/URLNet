@@ -1,3 +1,4 @@
+import argparse
 import datetime
 import os
 import pickle
@@ -17,35 +18,119 @@ CHAR_AND_WORD = 3
 CHARWORD_AND_WORD = 4
 CHARWORD_AND_WORD_AND_CHAR = 5
 
-data_size = 10000
+data_size = 1000
 add_expert_feature = 1
 emb_mode = CHARWORD_AND_WORD_AND_CHAR
 
-base_dir = 'runs/%d_emb%d_dlm1_32dim_minwf1_1conv3456_5ep_expert%d' % (data_size, emb_mode, add_expert_feature)
-FLAGS = {
-    'log.checkpoint_dir': '%s/checkpoints/' % base_dir,
-    'data.char_dict_dir': '%s/chars_dict.p' % base_dir,
-    'model.emb_mode': emb_mode,
-    'data.delimit_mode': 1,
-    'data.max_len_words': 200,
-    'test.batch_size': 10,
-    'data.subword_dict_dir': '%s/subwords_dict.p' % base_dir,
-    'data.data_dir': './data/test_%s.txt' % data_size,
-    'data.word_dict_dir': '%s/words_dict.p' % base_dir,
-    'log.output_dir': base_dir,
-    'data.max_len_subwords': 20, 'data.max_len_chars': 200, 'model.emb_dim': 32,
-    'data.min_word_freq': 1,
-    'data.dev_pct': 0.1,
-    'train.add_expert_feature': add_expert_feature,
-    'train.l2_reg_lambda': 0.0,
-    'train.lr': 0.001,
-    'model.filter_sizes': "3,4,5,6",
-    'train.batch_size': 10,
-    'train.nb_epochs': 5,
-    'log.print_every': 50,
-    'log.eval_every': 50,
-    'log.checkpoint_every': 50
-}
+import sys
+
+if len(sys.argv) > 2:
+
+    parser = argparse.ArgumentParser(description="Train URLNet model")
+
+    # data args
+    default_max_len_words = 200
+    parser.add_argument('--data.max_len_words', type=int, default=default_max_len_words,
+                        metavar="MLW",
+                        help="maximum length of url in words (default: {})".format(
+                            default_max_len_words))
+    default_max_len_chars = 200
+    parser.add_argument('--data.max_len_chars', type=int, default=default_max_len_chars,
+                        metavar="MLC",
+                        help="maximum length of url in characters (default: {})".format(
+                            default_max_len_chars))
+    default_max_len_subwords = 20
+    parser.add_argument('--data.max_len_subwords', type=int, default=default_max_len_subwords,
+                        metavar="MLSW",
+                        help="maxium length of word in subwords/ characters (default: {})".format(
+                            default_max_len_subwords))
+    default_min_word_freq = 1
+    parser.add_argument('--data.min_word_freq', type=int, default=default_min_word_freq,
+                        metavar="MWF",
+                        help="minimum frequency of word in training population to build vocabulary (default: {})".format(
+                            default_min_word_freq))
+    default_dev_pct = 0.1
+    parser.add_argument('--data.dev_pct', type=float, default=default_dev_pct, metavar="DEVPCT",
+                        help="percentage of training set used for dev (default: {})".format(
+                            default_dev_pct))
+    parser.add_argument('--data.data_dir', type=str, default='train_10000.txt', metavar="DATADIR",
+                        help="location of data file")
+    default_delimit_mode = 1
+    parser.add_argument("--data.delimit_mode", type=int, default=default_delimit_mode,
+                        metavar="DLMODE",
+                        help="0: delimit by special chars, 1: delimit by special chars + each char as a word (default: {})".format(
+                            default_delimit_mode))
+
+    # model args
+    default_emb_dim = 32
+    parser.add_argument('--model.emb_dim', type=int, default=default_emb_dim, metavar="EMBDIM",
+                        help="embedding dimension size (default: {})".format(default_emb_dim))
+    default_filter_sizes = "3,4,5,6"
+    parser.add_argument('--model.filter_sizes', type=str, default=default_filter_sizes,
+                        metavar="FILTERSIZES",
+                        help="filter sizes of the convolution layer (default: {})".format(
+                            default_filter_sizes))
+    default_emb_mode = 1
+    parser.add_argument('--model.emb_mode', type=int, default=default_emb_mode, metavar="EMBMODE",
+                        help="1: charCNN, 2: wordCNN, 3: char + wordCNN, 4: char-level wordCNN, 5: char + char-level wordCNN (default: {})".format(
+                            default_emb_mode))
+
+    # train args
+    default_nb_epochs = 5
+    parser.add_argument('--train.nb_epochs', type=int, default=default_nb_epochs, metavar="NEPOCHS",
+                        help="number of training epochs (default: {})".format(default_nb_epochs))
+    default_batch_size = 128
+    parser.add_argument('--train.batch_size', type=int, default=default_batch_size,
+                        metavar="BATCHSIZE",
+                        help="Size of each training batch (default: {})".format(default_batch_size))
+
+    parser.add_argument('--train.add_expert_feature', type=int, default=0,
+                        metavar="ADDEXPERTREATURE",
+                        help="add expert feature (default: {})".format(default_batch_size))
+
+    parser.add_argument('--train.l2_reg_lambda', type=float, default=0.0, metavar="L2LREGLAMBDA",
+                        help="l2 lambda for regularization (default: 0.0)")
+    default_lr = 0.001
+    parser.add_argument('--train.lr', type=float, default=default_lr, metavar="LR",
+                        help="learning rate for optimizer (default: {})".format(default_lr))
+
+    # log args
+    parser.add_argument('--log.output_dir', type=str, default="runs/10000/", metavar="OUTPUTDIR",
+                        help="directory of the output model")
+    parser.add_argument('--log.print_every', type=int, default=50, metavar="PRINTEVERY",
+                        help="print training result every this number of steps (default: 50)")
+    parser.add_argument('--log.eval_every', type=int, default=500, metavar="EVALEVERY",
+                        help="evaluate the model every this number of steps (default: 500)")
+    parser.add_argument('--log.checkpoint_every', type=int, default=500, metavar="CHECKPOINTEVERY",
+                        help="save a model every this number of steps (default: 500)")
+
+    FLAGS = vars(parser.parse_args())
+else:
+    base_dir = 'runs/%d_emb%d_dlm1_32dim_minwf1_1conv3456_5ep_expert%d' % (data_size, emb_mode, add_expert_feature)
+    FLAGS = {
+        'log.checkpoint_dir': '%s/checkpoints/' % base_dir,
+        'data.char_dict_dir': '%s/chars_dict.p' % base_dir,
+        'model.emb_mode': emb_mode,
+        'data.delimit_mode': 1,
+        'data.max_len_words': 200,
+        'test.batch_size': 10,
+        'data.subword_dict_dir': '%s/subwords_dict.p' % base_dir,
+        'data.data_dir': './data/test_%s.txt' % data_size,
+        'data.word_dict_dir': '%s/words_dict.p' % base_dir,
+        'log.output_dir': base_dir,
+        'data.max_len_subwords': 20, 'data.max_len_chars': 200, 'model.emb_dim': 32,
+        'data.min_word_freq': 1,
+        'data.dev_pct': 0.1,
+        'train.add_expert_feature': add_expert_feature,
+        'train.l2_reg_lambda': 0.0,
+        'train.lr': 0.001,
+        'model.filter_sizes': "3,4,5,6",
+        'train.batch_size': 10,
+        'train.nb_epochs': 5,
+        'log.print_every': 50,
+        'log.eval_every': 50,
+        'log.checkpoint_every': 50
+    }
 
 urls, labels = read_data(FLAGS["data.data_dir"])
 
@@ -121,26 +206,26 @@ def train_dev_step(x, y, emb_mode, is_train=True):
         p = 1.0
     if emb_mode == CHAR:
         feed_dict = {
-            cnn.input_expert_features: x[0],
+            cnn.input_expert_feature: x[0],
             cnn.input_x_char_id: x[1],
             cnn.input_y: y,
             cnn.dropout_keep_prob: p}
     elif emb_mode == WORD:
         feed_dict = {
-            cnn.input_expert_features: x[0],
+            cnn.input_expert_feature: x[0],
             cnn.input_x_word_id: x[1],
             cnn.input_y: y,
             cnn.dropout_keep_prob: p}
     elif emb_mode == CHAR_AND_WORD:
         feed_dict = {
-            cnn.input_expert_features: x[0],
+            cnn.input_expert_feature: x[0],
             cnn.input_x_char_id: x[1],
             cnn.input_x_word_id: x[2],
             cnn.input_y: y,
             cnn.dropout_keep_prob: p}
     elif emb_mode == CHARWORD_AND_WORD:
         feed_dict = {
-            cnn.input_expert_features: x[0],
+            cnn.input_expert_feature: x[0],
             cnn.input_x_word_id: x[1],
             cnn.input_x_charword_id: x[2],
             cnn.input_x_charword_id_embedding: x[3],
@@ -148,7 +233,7 @@ def train_dev_step(x, y, emb_mode, is_train=True):
             cnn.dropout_keep_prob: p}
     elif emb_mode == CHARWORD_AND_WORD_AND_CHAR:
         feed_dict = {
-            cnn.input_expert_features: x[0],
+            cnn.input_expert_feature: x[0],
             cnn.input_x_char_id: x[1],
             cnn.input_x_word_id: x[2],
             cnn.input_x_charword_id: x[3],
@@ -280,7 +365,7 @@ with tf.Graph().as_default():
             f.write("step,time,loss,acc\n")
 
         # Save model checkpoints
-        checkpoint_dir = FLAGS["log.checkpoint_dir"]
+        checkpoint_dir =  FLAGS["log.output_dir"] + "/checkpoints/"
         if not os.path.exists(checkpoint_dir):
             os.makedirs(checkpoint_dir)
         checkpoint_prefix = checkpoint_dir + "model"
