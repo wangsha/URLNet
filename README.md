@@ -139,7 +139,7 @@ Test parameters include:
 The test parameters such as `model.emb_mode` and `data.delimit_mode` have to be
 consistent with the trained model to get accurate test results.
 
-Refer to the file `run.sh` for example commands.
+Refer to the file `demo.sh` for example commands.
 
 Acknowledgement
 ---------------

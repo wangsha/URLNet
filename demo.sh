@@ -6,9 +6,10 @@ test_size=10000
 nb_epoch=5
 data_dir='./data'
 
+
 for ((i=0; i <${#emb_modes[@]}; ++i))
     do
-    python train.py --data.data_dir ${data_dir}/train_${train_size}.txt \
+    python temp_debug.py --data.data_dir ${data_dir}/train_${train_size}.txt \
     --data.dev_pct 0.001 --data.delimit_mode ${delimit_modes[$i]} --data.min_word_freq 1 \
     --model.emb_mode ${emb_modes[$i]} --model.emb_dim 32 --model.filter_sizes 3,4,5,6 \
     --train.nb_epochs ${nb_epoch} --train.batch_size 1048 \
