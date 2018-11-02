@@ -66,7 +66,7 @@ if len(sys.argv) > 2:
                         help="1: charCNN, 2: wordCNN, 3: char + wordCNN, 4: char-level wordCNN, 5: char + char-level wordCNN (default: {})".format(
                             default_emb_mode))
 
-    parser.add_argument('--model.add_expert_feature', type=int, default=0, metavar="EMBEXPERT",
+    parser.add_argument('--train.add_expert_feature', type=int, default=0, metavar="EMBEXPERT",
                         help="0: no, 1: yes")
 
     # train args
@@ -77,10 +77,6 @@ if len(sys.argv) > 2:
     parser.add_argument('--train.batch_size', type=int, default=default_batch_size,
                         metavar="BATCHSIZE",
                         help="Size of each training batch (default: {})".format(default_batch_size))
-
-    parser.add_argument('--train.add_expert_feature', type=int, default=0,
-                        metavar="ADDEXPERTREATURE",
-                        help="add expert feature (default: {})".format(default_batch_size))
 
     parser.add_argument('--train.l2_reg_lambda', type=float, default=0.0, metavar="L2LREGLAMBDA",
                         help="l2 lambda for regularization (default: 0.0)")
@@ -118,7 +114,7 @@ else:
         'data.max_len_subwords': 20, 'data.max_len_chars': 200, 'model.emb_dim': 32,
         'data.min_word_freq': 1,
         'data.dev_pct': 0.1,
-        'model.add_expert_feature': add_expert_feature,
+        'train.add_expert_feature': add_expert_feature,
         'train.l2_reg_lambda': 0.0,
         'train.lr': 0.001,
         'model.filter_sizes': "3,4,5,6",
@@ -378,7 +374,7 @@ with tf.Graph().as_default():
                                                                        y_train_idx,
                                                                        FLAGS["train.batch_size"],
                                                                        FLAGS['train.nb_epochs'],
-                                                                       True)
+                                                                       shuffle=True)
 
         min_dev_loss = float('Inf')
         dev_loss = float('Inf')

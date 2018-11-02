@@ -10,12 +10,9 @@ import tensorflow as tf
 from tensorflow.contrib import learn
 from tflearn.data_utils import to_categorical, pad_sequences
 import sys
+from common import CHAR, WORD, CHAR_AND_WORD, CHARWORD_AND_WORD, CHARWORD_AND_WORD_AND_CHAR
 
-CHAR = 1
-WORD = 2
-CHAR_AND_WORD = 3
-CHARWORD_AND_WORD = 4
-CHARWORD_AND_WORD_AND_CHAR = 5
+
 
 if len(sys.argv) > 2:
     parser = argparse.ArgumentParser(description="Test URLNet model")
@@ -74,22 +71,24 @@ if len(sys.argv) > 2:
     FLAGS = vars(parser.parse_args())
 else:
 
-    data_size = 10000
-    add_expert_feature = 1
-    emb_mode = CHARWORD_AND_WORD_AND_CHAR
-    base_dir = 'runs/%d_emb%d_dlm1_32dim_minwf1_1conv3456_5ep_expert%d' % (data_size, emb_mode, add_expert_feature)
+    data_size = 1000
+    add_expert_feature = 0
+    delimit_mode = 0
+    emb_mode = WORD
+    base_dir = 'runs/%d_emb%d_dlm%d_32dim_minwf1_1conv3456_5ep_expert%d' \
+               % (data_size, emb_mode, delimit_mode, add_expert_feature)
 
     FLAGS = {
         'log.checkpoint_dir': '%s/checkpoints/' % base_dir,
         'data.char_dict_dir': '%s/chars_dict.p' % base_dir,
         'model.emb_mode': emb_mode,
-        'data.delimit_mode': 1,
+        'data.delimit_mode': delimit_mode,
         'data.max_len_words': 200,
         'test.batch_size': 10,
         'data.subword_dict_dir': '%s/subwords_dict.p' % base_dir,
         'data.data_dir': './data/test_%s.txt' % data_size,
         'data.word_dict_dir': '%s/words_dict.p' % base_dir,
-        'log.output_dir': base_dir,
+        'log.output_dir': base_dir+'/train_%s_test_%s.txt' % (data_size, data_size),
         'data.max_len_subwords': 20, 'data.max_len_chars': 200, 'model.emb_dim': 32,
         'data.min_word_freq': 1,
         'data.dev_pct': 0.1,
@@ -175,11 +174,10 @@ with graph.as_default():
         saver = tf.train.import_meta_graph("{}.meta".format(checkpoint_file))
         saver.restore(sess, checkpoint_file)
         input_expert_feature = graph.get_operation_by_name('input_expert_feature').outputs[0]
-        input_add_expert_feature = graph.get_operation_by_name('input_add_expert_feature').outputs[0]
         if FLAGS["model.emb_mode"] in [CHAR, CHAR_AND_WORD, CHARWORD_AND_WORD_AND_CHAR]:
             input_x_char_id = graph.get_operation_by_name("input_x_char_id").outputs[0]
-        if FLAGS["model.emb_mode"] in [CHAR_AND_WORD, CHARWORD_AND_WORD,
-                                       CHARWORD_AND_WORD_AND_CHAR, CHARWORD_AND_WORD_AND_CHAR]:
+        if FLAGS["model.emb_mode"] in [CHAR_AND_WORD, CHARWORD_AND_WORD, WORD,
+                                       CHARWORD_AND_WORD_AND_CHAR]:
             input_x_word_id = graph.get_operation_by_name("input_x_word_id").outputs[0]
         if FLAGS["model.emb_mode"] in [CHARWORD_AND_WORD, CHARWORD_AND_WORD_AND_CHAR]:
             input_x_charword_id = graph.get_operation_by_name("input_x_charword_id").outputs[0]
@@ -249,9 +247,9 @@ with graph.as_default():
             batch_predictions, batch_scores = test_step(x_batch, FLAGS["model.emb_mode"])
             all_predictions = np.concatenate([all_predictions, batch_predictions])
             all_scores.extend(batch_scores)
-
             it.set_postfix()
 
+all_predictions = np.array(map(int, all_predictions))
 if labels is not None:
     correct_preds = float(sum(all_predictions == labels))
     print("Accuracy: {}".format(correct_preds / float(len(labels))))
