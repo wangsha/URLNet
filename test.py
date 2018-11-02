@@ -11,6 +11,12 @@ from tensorflow.contrib import learn
 from tflearn.data_utils import to_categorical, pad_sequences
 import sys
 
+CHAR = 1
+WORD = 2
+CHAR_AND_WORD = 3
+CHARWORD_AND_WORD = 4
+CHARWORD_AND_WORD_AND_CHAR = 5
+
 if len(sys.argv) > 2:
     parser = argparse.ArgumentParser(description="Test URLNet model")
 
@@ -67,12 +73,6 @@ if len(sys.argv) > 2:
 
     FLAGS = vars(parser.parse_args())
 else:
-
-    CHAR = 1
-    WORD = 2
-    CHAR_AND_WORD = 3
-    CHARWORD_AND_WORD = 4
-    CHARWORD_AND_WORD_AND_CHAR = 5
 
     data_size = 10000
     add_expert_feature = 1
@@ -175,10 +175,11 @@ with graph.as_default():
         saver = tf.train.import_meta_graph("{}.meta".format(checkpoint_file))
         saver.restore(sess, checkpoint_file)
         input_expert_feature = graph.get_operation_by_name('input_expert_feature').outputs[0]
-
+        input_add_expert_feature = graph.get_operation_by_name('input_add_expert_feature').outputs[0]
         if FLAGS["model.emb_mode"] in [CHAR, CHAR_AND_WORD, CHARWORD_AND_WORD_AND_CHAR]:
             input_x_char_id = graph.get_operation_by_name("input_x_char_id").outputs[0]
-        if FLAGS["model.emb_mode"] in [CHAR, CHAR_AND_WORD, CHARWORD_AND_WORD, CHARWORD_AND_WORD_AND_CHAR]:
+        if FLAGS["model.emb_mode"] in [CHAR_AND_WORD, CHARWORD_AND_WORD,
+                                       CHARWORD_AND_WORD_AND_CHAR, CHARWORD_AND_WORD_AND_CHAR]:
             input_x_word_id = graph.get_operation_by_name("input_x_word_id").outputs[0]
         if FLAGS["model.emb_mode"] in [CHARWORD_AND_WORD, CHARWORD_AND_WORD_AND_CHAR]:
             input_x_charword_id = graph.get_operation_by_name("input_x_charword_id").outputs[0]

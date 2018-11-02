@@ -6,21 +6,12 @@ import pickle
 from tqdm import tqdm
 
 from TextCNN import TextCNN
+from common import CHAR, WORD, CHAR_AND_WORD, CHARWORD_AND_WORD, CHARWORD_AND_WORD_AND_CHAR
 from expert_features import get_expert_features
 from utils import get_word_vocab, read_data, ngram_id_x, get_words, char_id_x, prep_train_test, \
     get_ngramed_id_x, pad_seq_in_word, pad_seq, batch_iter
 import tensorflow as tf
 import numpy as np
-
-CHAR = 1
-WORD = 2
-CHAR_AND_WORD = 3
-CHARWORD_AND_WORD = 4
-CHARWORD_AND_WORD_AND_CHAR = 5
-
-data_size = 1000
-add_expert_feature = 1
-emb_mode = CHARWORD_AND_WORD_AND_CHAR
 
 import sys
 
@@ -75,6 +66,9 @@ if len(sys.argv) > 2:
                         help="1: charCNN, 2: wordCNN, 3: char + wordCNN, 4: char-level wordCNN, 5: char + char-level wordCNN (default: {})".format(
                             default_emb_mode))
 
+    parser.add_argument('--model.add_expert_feature', type=int, default=0, metavar="EMBEXPERT",
+                        help="0: no, 1: yes")
+
     # train args
     default_nb_epochs = 5
     parser.add_argument('--train.nb_epochs', type=int, default=default_nb_epochs, metavar="NEPOCHS",
@@ -106,6 +100,9 @@ if len(sys.argv) > 2:
 
     FLAGS = vars(parser.parse_args())
 else:
+    data_size = 1000
+    add_expert_feature = 1
+    emb_mode = CHARWORD_AND_WORD_AND_CHAR
     base_dir = 'runs/%d_emb%d_dlm1_32dim_minwf1_1conv3456_5ep_expert%d' % (data_size, emb_mode, add_expert_feature)
     FLAGS = {
         'log.checkpoint_dir': '%s/checkpoints/' % base_dir,
@@ -121,7 +118,7 @@ else:
         'data.max_len_subwords': 20, 'data.max_len_chars': 200, 'model.emb_dim': 32,
         'data.min_word_freq': 1,
         'data.dev_pct': 0.1,
-        'train.add_expert_feature': add_expert_feature,
+        'model.add_expert_feature': add_expert_feature,
         'train.l2_reg_lambda': 0.0,
         'train.lr': 0.001,
         'model.filter_sizes': "3,4,5,6",
