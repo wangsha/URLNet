@@ -49,7 +49,10 @@ def tokenize_row(row):
 
 def urlparse_feature_expand(df):
     import re
-    from urlparse import urlparse
+    try:
+        from urllib.parse import urlparse
+    except ImportError:
+        from urlparse import urlparse
 
     def _parse_url(url):
         if not url.startswith('http://') or not url.startswith('https://'):
