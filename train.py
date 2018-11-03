@@ -56,6 +56,7 @@ parser.add_argument('--train.nb_epochs', type=int, default=default_nb_epochs, me
 default_batch_size = 128
 parser.add_argument('--train.batch_size', type=int, default=default_batch_size, metavar="BATCHSIZE",
   help="Size of each training batch (default: {})".format(default_batch_size))
+
 parser.add_argument('--train.l2_reg_lambda', type=float, default=0.0, metavar="L2LREGLAMBDA",
   help="l2 lambda for regularization (default: 0.0)")
 default_lr = 0.001
