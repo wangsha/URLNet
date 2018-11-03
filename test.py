@@ -72,9 +72,9 @@ if len(sys.argv) > 2:
 else:
 
     data_size = 1000
-    add_expert_feature = 0
-    delimit_mode = 0
-    emb_mode = WORD
+    add_expert_feature = 1
+    delimit_mode = 1
+    emb_mode = CHARWORD_AND_WORD_AND_CHAR
     base_dir = 'runs/%d_emb%d_dlm%d_32dim_minwf1_1conv3456_5ep_expert%d' \
                % (data_size, emb_mode, delimit_mode, add_expert_feature)
 
@@ -249,7 +249,7 @@ with graph.as_default():
             all_scores.extend(batch_scores)
             it.set_postfix()
 
-all_predictions = np.array(map(int, all_predictions))
+#all_predictions = np.array(map(int, all_predictions))
 if labels is not None:
     correct_preds = float(sum(all_predictions == labels))
     print("Accuracy: {}".format(correct_preds / float(len(labels))))

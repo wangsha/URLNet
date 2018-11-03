@@ -401,23 +401,31 @@ def batch_iter(data, batch_size, num_epochs, shuffle=True):
 
 
 def save_test_result(labels, all_predictions, all_scores, output_dir):
+    DEBUG = False
     output_labels = []
     for i in labels:
-        if i == 1:
+        if i > 0:
             output_labels.append(i)
         else:
             output_labels.append(-1)
     output_preds = []
     for i in all_predictions:
-        if i == 1:
+        if i > 0:
             output_preds.append(i)
         else:
             output_preds.append(-1)
     softmax_scores = [softmax(i) for i in all_scores]
     with open(output_dir, "w") as file:
         output = "label\tpredict\tscore\n"
+        if DEBUG:
+            output = "raw_label\tlabel\traw_predict\tpredict\tscore\n"
         file.write(output)
         for i in range(len(output_labels)):
-            output = str(int(output_labels[i])) + '\t' + str(int(output_preds[i])) + '\t' + str(
-                softmax_scores[i][1]) + '\n'
+            output = str(int(output_labels[i])) + '\t' + \
+                    str(int(output_preds[i])) + '\t' \
+                     + str(softmax_scores[i][1]) + '\n'
+            if DEBUG:
+                output = str(int(labels[i])) + '\t' + str(int(output_labels[i])) + '\t' + \
+                     str(int(all_predictions[i])) + '\t' + str(int(output_preds[i])) + '\t' \
+                     + str(softmax_scores[i][1]) + '\n'
             file.write(output)

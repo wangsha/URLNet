@@ -99,14 +99,16 @@ else:
     data_size = 1000
     add_expert_feature = 1
     emb_mode = CHARWORD_AND_WORD_AND_CHAR
-    base_dir = 'runs/%d_emb%d_dlm1_32dim_minwf1_1conv3456_5ep_expert%d' % (data_size, emb_mode, add_expert_feature)
+    delimit_mode = 1
+    base_dir = 'runs/%d_emb%d_dlm%s_32dim_minwf1_1conv3456_5ep_expert%d' \
+               % (data_size, emb_mode, delimit_mode, add_expert_feature)
     FLAGS = {
         'log.checkpoint_dir': '%s/checkpoints/' % base_dir,
         'data.char_dict_dir': '%s/chars_dict.p' % base_dir,
         'model.emb_mode': emb_mode,
         'data.delimit_mode': 1,
         'data.max_len_words': 200,
-        'test.batch_size': 10,
+        'test.batch_size': 100,
         'data.subword_dict_dir': '%s/subwords_dict.p' % base_dir,
         'data.data_dir': './data/test_%s.txt' % data_size,
         'data.word_dict_dir': '%s/words_dict.p' % base_dir,
