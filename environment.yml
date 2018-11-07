@@ -2,3 +2,4 @@ name: URLNet
 dependencies:
   - tflearn
   - tqdm
+  - pandas
