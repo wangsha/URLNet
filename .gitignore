@@ -5,3 +5,5 @@ runs
 data
 __pycache__
 *.pyc
+runs.zip
+.ipynb_checkpoints
