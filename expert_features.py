@@ -2,6 +2,11 @@ import string
 import numpy as np
 import pandas as pd
 
+try:
+    from urllib.parse import urlparse, unquote
+except ImportError:
+    from urlparse import urlparse, unquote
+
 
 def entropy2(labels, base=None):
     """ Computes entropy of label distribution. """
@@ -35,8 +40,22 @@ def char_feature_expand(df):
 
 
 def specialchar_feature_expand(df):
-    for char in "_.~!*'();:@&=+$,/?#[%-]":
-        df['count_%s' % char] = df['url'].apply(lambda url: float(url.count(char)))
+    for char in "_.~!*'();:@&=+$,/\?#[%-]":
+        df['count_%s' % char] = df['url'].apply(lambda url: float(unquote(url).count(char)))
+        double_char = '%s%s' % (char, char)
+        df['double_%s' % double_char] = df['url'].apply(lambda url: float(unquote(url).count(
+            double_char)))
+
+
+def other_feature_expand(df):
+    def _count_special_words(url):
+        url = url.lower()
+        count = 0
+        for word in ['.exe', '.zip', '.dll', 'signin', 'password', 'reset', 'login', 'buy',
+                     'pay', 'download', 'confirm']:
+            count += url.count(word)
+        return count
+    df['special_word'] = df['url'].apply(_count_special_words)
 
 
 def tokenize_row(row):
@@ -49,10 +68,9 @@ def tokenize_row(row):
 
 def urlparse_feature_expand(df):
     import re
-    from urlparse import urlparse
 
     def _parse_url(url):
-        if not url.startswith('http://') or not url.startswith('https://'):
+        if not (url.startswith('http://') or url.startswith('https://')):
             url = 'http://%s' % url
         x = urlparse(url)
 
@@ -84,7 +102,8 @@ def urlparse_feature_expand(df):
             print(url)
             print(x)
 
-        return x.scheme, x.netloc, x.path, x.params, x.query, x.fragment, port, hostname, primary_domain, top_level_domain, subdomain, filename, not_ip
+        return x.scheme, hostname, x.path, x.params, x.query, x.fragment, port, hostname, \
+               primary_domain, top_level_domain, subdomain, filename, not_ip
 
     df['scheme'], df['domain'], df['path'], df['params'], df['query'], df['fragment'], df['port'], \
     df['hostname'], df['primary_domain'], df['top_level_domain'], df['subdomain'], df['filename'], \
@@ -133,6 +152,8 @@ def get_expert_features(urls):
     char_feature_expand(df)
     specialchar_feature_expand(df)
     urlparse_feature_expand(df)
+    other_feature_expand(df)
+    df.to_csv("temp/url_features_%s.csv" % len(urls))
     df = df._get_numeric_data().replace(np.nan, 0)
     df = normalize_dataframe(df)
     return df.values

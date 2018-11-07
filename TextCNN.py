@@ -170,14 +170,10 @@ class TextCNN(object):
             self.conv_output = self.char_h_drop
 
         ############################### HUMAN Expert Features ############################
-        if add_expert_feature:
-            self.conv_output = tf.concat([self.conv_output, self.input_expert_feature], 1)
+
         ################################ RELU AND FC ###################################
         with tf.name_scope("output"):
-            input_dim = 1024
-            if add_expert_feature:
-                input_dim += expert_feature_size
-            w0 = tf.get_variable("w0", shape=[input_dim, 512],
+            w0 = tf.get_variable("w0", shape=[1024, 512],
                                  initializer=tf.contrib.layers.xavier_initializer())
             b0 = tf.Variable(tf.constant(0.1, shape=[512]), name="b0")
             l2_loss += tf.nn.l2_loss(w0)
@@ -198,7 +194,12 @@ class TextCNN(object):
             l2_loss += tf.nn.l2_loss(b2)
             output2 = tf.nn.relu(tf.matmul(output1, w2) + b2)
 
-            w = tf.get_variable("w", shape=(128, 2),
+            input_dim = 128
+            if add_expert_feature:
+                input_dim += expert_feature_size
+                if add_expert_feature:
+                    output2 = tf.concat([output2, self.input_expert_feature], 1)
+            w = tf.get_variable("w", shape=(input_dim, 2),
                                 initializer=tf.contrib.layers.xavier_initializer())
             b = tf.Variable(tf.constant(0.1, shape=[2]), name="b")
             l2_loss += tf.nn.l2_loss(w)
