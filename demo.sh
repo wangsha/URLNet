@@ -34,5 +34,5 @@ task(){
 
 for ((i=0; i <${#emb_modes[@]}; ++i))
     do
-        task "$i" &
+        task "$i"
     done
