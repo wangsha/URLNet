@@ -4,12 +4,15 @@
 Introduction
 ------------
 
-This is an implementation of URLNet - Learning a URL Representation with Deep
+This is an for from original implementation of URLNet - Learning a URL Representation 
+with Deep
 Learning for Malicious URL Detection https://arxiv.org/abs/1802.03162
 
 URLNet is a convolutional neural network (CNN) based model used to detect
 malicious URLs. The model exploits features of URL text string at both character
 and word levels.
+
+This fork extend original URLNet by concatinating expert features to last FC layer.
 
 Resources
 ---------
@@ -107,6 +110,7 @@ Training parameters include:
 | model.emb_dim         | Dimension size of word and character embedding.                                                                                                                                                 | 32              |
 | model.emb_mode        | 1: only character-based CNN, 2: only word-based CNN, 3: character and word CNN, 4: character-level word CNN, 5: character and character-level word CNN                                          | 1               |
 | model.filter_sizes    | Sizes of convolutional filters. If more than one branches of CNN, all will have the same set of filter sizes. Separate the filter sizes by comma.                                               | 3,4,5,6         |
+| train.add_expert_feature | 0: original URLNet, 1: with expert feature
 | train.batch_size      | Number of URLs in each training batch                                                                                                                                                           | 128             |
 | train.nb_epochs       | Number of training epochs                                                                                                                                                                       | 5               |
 | train.lr              | Learning rate                                                                                                                                                                                   | 0.001           |
