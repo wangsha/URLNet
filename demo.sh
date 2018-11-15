@@ -1,8 +1,6 @@
 #!/usr/bin/env bash
-#emb_modes=(1 2 2 3 3 4 5)
-#delimit_modes=(0 0 1 0 1 1 1 )
-emb_modes=(1 2 5)
-delimit_modes=(0 0 1)
+emb_modes=(1 2 2 3 3 4 5)
+delimit_modes=(0 0 1 0 1 1 1 )
 train_size=10000
 test_size=10000
 nb_epoch=5

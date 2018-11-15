@@ -1,18 +1,29 @@
 **URLNet**
 ==========
 
+CNN + expert feature
+---------
+This is a fork from original implementation of URLNet. Modification include
+- modify TextCNN to concat expert features to last FC layer
+- modify experiment scripts to run both URLNet and URLNet with expert feature
+- added scripts to create expert features
+- added scripts integrate tensorboard and plot experiment results
+- running URLNet with expert feature uses the same demo.sh, just need to turn on/off 
+add_expert_feature flag
+
+
 Introduction
 ------------
 
-This is an for from original implementation of URLNet - Learning a URL Representation 
-with Deep
-Learning for Malicious URL Detection https://arxiv.org/abs/1802.03162
+This is a fork from original implementation of URLNet - Learning a URL Representation 
+with Deep Learning for Malicious URL Detection https://arxiv.org/abs/1802.03162
 
 URLNet is a convolutional neural network (CNN) based model used to detect
 malicious URLs. The model exploits features of URL text string at both character
 and word levels.
 
 This fork extend original URLNet by concatinating expert features to last FC layer.
+
 
 Resources
 ---------
