@@ -149,11 +149,17 @@ def normalize_dataframe(df):
 
 def get_expert_features(urls):
     df = pd.DataFrame(urls, columns=['url'])
+    size1 = df.shape[1]
     char_feature_expand(df)
+    size2 = df.shape[1]
     specialchar_feature_expand(df)
+    size3 = df.shape[1]
     urlparse_feature_expand(df)
+    size4 = df.shape[1]
     other_feature_expand(df)
+    size5 = df.shape[1]
     df.to_csv("temp/url_features_%s.csv" % len(urls))
     df = df._get_numeric_data().replace(np.nan, 0)
+    size6 = df.shape[1]
     df = normalize_dataframe(df)
     return df.values

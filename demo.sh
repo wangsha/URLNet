@@ -1,21 +1,22 @@
 #!/usr/bin/env bash
-emb_modes=(1 2 2 3 3 4 5)
-delimit_modes=(0 0 1 0 1 1 1 )
-#emb_modes=(5)
-#delimit_modes=(1)
-train_size=500000
-test_size=500000
+#emb_modes=(1 2 2 3 3 4 5)
+#delimit_modes=(0 0 1 0 1 1 1 )
+emb_modes=(1 2 5)
+delimit_modes=(0 0 1)
+train_size=10000
+test_size=10000
 nb_epoch=5
 data_dir='./data'
 
 add_expert_feature=1
 
 task(){
-    python temp_debug.py --data.data_dir ${data_dir}/train_${train_size}.txt \
-    --data.dev_pct 0.001 --data.delimit_mode ${delimit_modes[$1]} --data.min_word_freq 1 \
+    python train_cnn_expert_feature.py --data.data_dir ${data_dir}/train_${train_size}.txt \
+    --data.dev_pct 0.01 --data.delimit_mode ${delimit_modes[$1]} --data.min_word_freq 1 \
     --train.add_expert_feature ${add_expert_feature} \
     --model.emb_mode ${emb_modes[$1]} --model.emb_dim 32 --model.filter_sizes 3,4,5,6 \
-    --train.nb_epochs ${nb_epoch} --train.batch_size 1048 --train.add_expert_feature=${add_expert_feature} \
+    --train.nb_epochs ${nb_epoch} --train.batch_size 1048 \
+    --train.add_expert_feature=${add_expert_feature} \
     --log.print_every 5 --log.eval_every 10 --log.checkpoint_every 10 \
     --log.output_dir runs/${train_size}_emb${emb_modes[$1]}_dlm${delimit_modes[$1]}_32dim_minwf1_1conv3456_${nb_epoch}ep_expert${add_expert_feature}/
 
